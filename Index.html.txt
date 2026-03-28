@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html><head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MUPPURI</title>
+<style>
+  body{margin:0;background:#0a0a1a;color:#fff;font-family:Arial,sans-serif;
+       display:flex;flex-direction:column;align-items:center;
+       justify-content:center;min-height:100vh;text-align:center;padding:20px}
+  h1{font-size:2.5rem;color:#00ff88;margin:0 0 8px}
+  .sub{color:#888;margin:0 0 40px;font-size:1rem}
+  .orb{width:140px;height:140px;border-radius:50%;
+       background:radial-gradient(circle,#00ff88,#0066ff);
+       cursor:pointer;display:flex;align-items:center;justify-content:center;
+       font-size:1rem;font-weight:bold;color:#000;margin:0 auto 30px;
+       transition:transform .2s;box-shadow:0 0 40px #00ff8844}
+  .orb.listening{transform:scale(1.15);box-shadow:0 0 80px #00ff88aa;
+                 animation:pulse 1s infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 40px #00ff88aa}
+                   50%{box-shadow:0 0 120px #00ff88}}
+  .status{font-size:1.1rem;color:#aaa;margin-bottom:16px;min-height:28px}
+  .reply{background:#111;border-radius:12px;padding:20px;
+         max-width:500px;width:100%;font-size:1rem;line-height:1.6;
+         color:#eee;margin-top:20px;display:none;text-align:left}
+  .hist{max-width:500px;width:100%;margin-top:16px}
+  .hist-item{background:#111;border-radius:8px;padding:10px 14px;
+             margin-bottom:8px;font-size:.85rem;color:#aaa;text-align:left}
+  .hist-cmd{color:#00ff88;font-weight:bold;margin-bottom:4px}
+  input[type=password]{background:#111;border:1px solid #333;border-radius:8px;
+    padding:10px 14px;color:#fff;font-size:1rem;width:100%;max-width:300px;
+    margin-bottom:20px;text-align:center}
+</style>
+</head><body>
+
+<h1>MUPPURI</h1>
+<p class="sub">Your Personal AI Agent — Always Ready</p>
+
+<input type="password" id="secret" placeholder="Enter secret word" />
+
+<div class="orb" id="orb" onclick="toggleListen()">
+  <span id="orb-text">TAP TO WAKE</span>
+</div>
+
+<div class="status" id="status">Tap the orb or say MUPPURI</div>
+<div class="reply" id="reply"></div>
+<div class="hist" id="hist"></div>
+
+<script>
+const BRAIN_URL = "YOUR_RAILWAY_URL_HERE"; // ← paste your Railway URL
+const WAKE_WORD = "muppuri";
+
+let recognition, listening = false, synth = window.speechSynthesis;
+
+function speak(text){
+  synth.cancel();
+  let u = new SpeechSynthesisUtterance(text);
+  u.rate = 1; u.pitch = 1; synth.speak(u);
+}
+
+function setStatus(t, col="#aaa"){
+  document.getElementById("status").style.color = col;
+  document.getElementById("status").textContent = t;
+}
+
+async function sendCommand(cmd){
+  setStatus("MUPPURI is thinking...", "#0066ff");
+  document.getElementById("orb-text").textContent = "THINKING";
+  const secret = document.getElementById("secret").value;
+  try {
+    const r = await fetch(BRAIN_URL+"/voice", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({transcript: cmd, secret: secret})
+    });
+    const d = await r.json();
+    if(d.error){ setStatus("Wrong secret word","#ff4444"); return; }
+    const reply = d.reply;
+    document.getElementById("reply").style.display="block";
+    document.getElementById("reply").textContent = reply;
+    speak(reply);
+    setStatus("MUPPURI replied", "#00ff88");
+    document.getElementById("orb-text").textContent = "LISTENING";
+    // add to history
+    const h = document.createElement("div");
+    h.className="hist-item";
+    h.innerHTML=`<div class="hist-cmd">YOU: ${cmd}</div>MUPPURI: ${reply.substring(0,120)}...`;
+    document.getElementById("hist").prepend(h);
+  } catch(e){ setStatus("Connection error — check Railway URL","#ff4444"); }
+}
+
+function startRecognition(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ alert("Use Chrome browser for voice recognition"); return; }
+  recognition = new SR();
+  recognition.continuous = true;
+  recognition.interimResults = false;
+  recognition.lang = "en-IN";
+  recognition.onresult = (e) => {
+    const t = e.results[e.results.length-1][0].transcript.toLowerCase().trim();
+    setStatus("Heard: "+t, "#ffaa00");
+    if(t.includes(WAKE_WORD)){
+      const cmd = t.split(WAKE_WORD).slice(1).join(" ").trim();
+      if(cmd.length > 2){ speak("Yes, processing your command."); sendCommand(cmd); }
+      else { setStatus("Say MUPPURI followed by your command","#ffaa00"); speak("Yes? What do you need?"); }
+    }
+  };
+  recognition.onerror = () => { setStatus("Mic error — tap to retry","#ff4444"); listening=false; };
+  recognition.onend = () => { if(listening) recognition.start(); };
+  recognition.start();
+}
+
+function toggleListen(){
+  listening = !listening;
+  const orb = document.getElementById("orb");
+  if(listening){
+    orb.classList.add("listening");
+    document.getElementById("orb-text").textContent="LISTENING";
+    setStatus("Listening... say MUPPURI [command]","#00ff88");
+    startRecognition();
+  } else {
+    orb.classList.remove("listening");
+    document.getElementById("orb-text").textContent="TAP TO WAKE";
+    setStatus("Tap the orb to activate","#aaa");
+    if(recognition) recognition.stop();
+    synth.cancel();
+  }
+}
+
+// Auto-wake on voice even before tap (Chrome only)
+document.addEventListener("DOMContentLoaded", ()=>{
+  setStatus("Enter secret word above, then tap the orb");
+});
+</script>
+</body></html>
