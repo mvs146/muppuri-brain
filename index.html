@@ -3,402 +3,601 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#050510">
 <title>MUPPURI</title>
+<link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;MUPPURI&quot;,&quot;short_name&quot;:&quot;MUPPURI&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#050510&quot;,&quot;theme_color&quot;:&quot;#00ff88&quot;}">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#050510;color:#fff;font-family:Arial,sans-serif;min-height:100vh;
-     display:flex;flex-direction:column;align-items:center;padding:24px 16px}
-.logo{font-size:3rem;font-weight:900;letter-spacing:.18em;color:#00ff88;margin-top:20px}
-.sub{font-size:.75rem;color:#333;letter-spacing:.1em;margin-bottom:4px}
-.ver{font-size:.62rem;color:#1a1a2e;margin-bottom:24px}
-.secret-row{display:flex;gap:8px;width:100%;max-width:320px;margin-bottom:20px}
-.sinput{flex:1;background:#0a0a1e;border:1px solid #1a1a3a;border-radius:10px;
-        padding:10px 14px;color:#fff;font-size:.9rem;outline:none}
-.sinput:focus{border-color:#00ff8855}
-.sinput::placeholder{color:#2a2a4a}
-.sbtn{background:#00ff8818;border:1px solid #00ff8833;border-radius:10px;
-      padding:10px 14px;color:#00ff88;font-size:.82rem;cursor:pointer}
-.orb-area{position:relative;width:170px;height:170px;display:flex;
-          align-items:center;justify-content:center;margin-bottom:20px}
-.ring{position:absolute;border-radius:50%;border:1px solid #00ff8812;pointer-events:none}
-.r1{width:170px;height:170px;animation:rp 2.5s ease-in-out infinite}
-.r2{width:200px;height:200px;animation:rp 2.5s ease-in-out infinite .8s}
-.r3{width:230px;height:230px;animation:rp 2.5s ease-in-out infinite 1.6s}
-@keyframes rp{0%,100%{opacity:.5;transform:scale(.97)}50%{opacity:.1;transform:scale(1.02)}}
-.orb{width:140px;height:140px;border-radius:50%;
-     background:radial-gradient(circle at 38% 35%,#00ff88,#0044cc 65%,#001144);
-     cursor:pointer;display:flex;flex-direction:column;align-items:center;
-     justify-content:center;z-index:2;box-shadow:0 0 50px #00ff8818;
-     -webkit-tap-highlight-color:transparent;transition:transform .15s}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;width:100%;overflow-x:hidden}
+body{background:#050510;color:#fff;font-family:Arial,sans-serif;
+     display:flex;flex-direction:column;align-items:center;
+     justify-content:center;min-height:100vh;padding:20px}
+
+/* LOGO */
+.logo{font-size:2.6rem;font-weight:900;letter-spacing:.2em;color:#00ff88;
+      text-align:center;margin-bottom:2px}
+.tagline{font-size:.65rem;color:#1e1e3a;letter-spacing:.12em;
+         text-align:center;margin-bottom:28px}
+
+/* SECRET SETUP — shown only first time */
+.setup{width:100%;max-width:300px;margin-bottom:28px;
+       background:#0a0a1e;border:1px solid #1a1a3a;border-radius:14px;
+       padding:16px;text-align:center}
+.setup-title{font-size:.72rem;color:#00ff8877;letter-spacing:.08em;
+             font-weight:700;margin-bottom:10px}
+.setup-row{display:flex;gap:8px}
+.sinput{flex:1;background:#050510;border:1px solid #1a1a3a;border-radius:9px;
+        padding:10px 12px;color:#fff;font-size:.9rem;outline:none;
+        text-align:center;letter-spacing:.1em}
+.sinput:focus{border-color:#00ff8844}
+.sinput::placeholder{color:#1a1a3a;font-size:.75rem}
+.sbtn{background:#00ff8818;border:1px solid #00ff8833;border-radius:9px;
+      padding:10px 14px;color:#00ff88;font-size:.8rem;cursor:pointer;white-space:nowrap}
+
+/* ORB */
+.orb-wrap{position:relative;width:200px;height:200px;
+          display:flex;align-items:center;justify-content:center;margin-bottom:24px}
+.ring{position:absolute;border-radius:50%;pointer-events:none;
+      border:1px solid #00ff8810}
+.r1{width:200px;height:200px;animation:rp 3s ease-in-out infinite}
+.r2{width:240px;height:240px;animation:rp 3s ease-in-out infinite 1s}
+.r3{width:280px;height:280px;animation:rp 3s ease-in-out infinite 2s}
+@keyframes rp{0%,100%{opacity:.6;transform:scale(.97)}
+              50%{opacity:.1;transform:scale(1.03)}}
+
+.orb{width:160px;height:160px;border-radius:50%;cursor:pointer;z-index:2;
+     background:radial-gradient(circle at 38% 35%,#00ff88 0%,#0044cc 60%,#001133 100%);
+     display:flex;flex-direction:column;align-items:center;justify-content:center;
+     box-shadow:0 0 60px #00ff8822;transition:transform .15s,box-shadow .3s;
+     user-select:none}
 .orb:active{transform:scale(.92)}
-.orb.on{box-shadow:0 0 110px #00ff8877;animation:op 1.3s ease-in-out infinite}
-.orb.thinking{box-shadow:0 0 80px #0088ff66;animation:tp .7s ease-in-out infinite}
-.orb.speaking{box-shadow:0 0 90px #ffaa0055;animation:sp .5s ease-in-out infinite}
-@keyframes op{0%,100%{box-shadow:0 0 60px #00ff8844}50%{box-shadow:0 0 150px #00ff88aa}}
-@keyframes tp{0%,100%{box-shadow:0 0 50px #0088ff33}50%{box-shadow:0 0 110px #0088ff88}}
-@keyframes sp{0%,100%{box-shadow:0 0 50px #ffaa0033}50%{box-shadow:0 0 100px #ffaa0077}}
-.orb-icon{font-size:2.3rem;margin-bottom:2px}
-.orb-lbl{font-size:.58rem;font-weight:800;letter-spacing:.14em;color:rgba(0,0,0,.75)}
-.wave{display:none;align-items:flex-end;justify-content:center;gap:3px;height:26px;margin-bottom:10px}
+
+/* ORB STATES */
+.orb.idle{box-shadow:0 0 40px #00ff8815}
+.orb.ready{box-shadow:0 0 80px #00ff8855;animation:ready 2.5s ease-in-out infinite}
+.orb.heard{box-shadow:0 0 130px #00ff88aa;animation:heard 0.6s ease-in-out infinite}
+.orb.thinking{box-shadow:0 0 100px #0088ff77;animation:think 0.8s ease-in-out infinite}
+.orb.speaking{box-shadow:0 0 110px #ffaa0066;animation:speak 0.4s ease-in-out infinite}
+@keyframes ready{0%,100%{box-shadow:0 0 60px #00ff8833}50%{box-shadow:0 0 120px #00ff8877}}
+@keyframes heard{0%,100%{box-shadow:0 0 100px #00ff88aa}50%{box-shadow:0 0 180px #00ff88ff}}
+@keyframes think{0%,100%{box-shadow:0 0 70px #0088ff44}50%{box-shadow:0 0 130px #0088ffaa}}
+@keyframes speak{0%,100%{box-shadow:0 0 80px #ffaa0044}50%{box-shadow:0 0 150px #ffaa00aa}}
+
+.orb-icon{font-size:2.8rem;margin-bottom:4px;transition:all .3s}
+.orb-state{font-size:.55rem;font-weight:800;letter-spacing:.15em;
+           color:rgba(0,0,0,.7);transition:all .3s}
+
+/* WAVEFORM */
+.wave{display:none;align-items:flex-end;justify-content:center;
+      gap:3px;height:30px;margin-bottom:16px}
 .wave.show{display:flex}
-.bar{width:4px;border-radius:2px;background:#00ff88;animation:wv .8s ease-in-out infinite}
-.bar:nth-child(1){height:8px}.bar:nth-child(2){height:18px;animation-delay:.1s}
-.bar:nth-child(3){height:24px;animation-delay:.2s}.bar:nth-child(4){height:14px;animation-delay:.3s}
-.bar:nth-child(5){height:20px;animation-delay:.4s}.bar:nth-child(6){height:10px;animation-delay:.5s}
-.bar:nth-child(7){height:22px;animation-delay:.15s}
-@keyframes wv{0%,100%{transform:scaleY(.4);opacity:.5}50%{transform:scaleY(1);opacity:1}}
-.st{background:#0a0a1e;border:1px solid #1a1a3a;border-radius:12px;padding:10px 18px;
-    margin-bottom:14px;min-width:280px;max-width:370px;text-align:center;
-    font-size:.86rem;min-height:38px;display:flex;align-items:center;justify-content:center;gap:7px}
-.dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;transition:background .3s}
-.g{background:#00ff88;animation:bk 1.8s infinite}
-.b{background:#0088ff;animation:bk .5s infinite}
-.y{background:#ffaa00;animation:bk .6s infinite}
-.r{background:#ff4444}
-@keyframes bk{0%,100%{opacity:1}50%{opacity:.15}}
-.heard{background:#0d0d25;border:1px solid #00ff8818;border-radius:9px;
-       padding:7px 14px;max-width:370px;width:100%;margin-bottom:10px;
-       font-size:.76rem;color:#00ff8877;font-style:italic;text-align:center;min-height:28px}
-.reply-box{background:#0a0a1e;border:1px solid #1a1a3a;border-radius:12px;
-           padding:13px 17px;max-width:370px;width:100%;margin-bottom:14px;display:none}
-.rlbl{font-size:.58rem;color:#00ff88;letter-spacing:.12em;font-weight:700;margin-bottom:6px}
-.rtxt{font-size:.9rem;color:#ccc;line-height:1.65}
-.badges{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;margin-bottom:14px}
-.badge{background:#0a1a0a;border:1px solid #00ff8818;border-radius:20px;
-       padding:3px 11px;font-size:.66rem;color:#00ff8866}
-.btns{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;margin-bottom:16px}
-.btn{background:#0a0a1e;border:1px solid #1a1a3a;border-radius:9px;
-     padding:8px 13px;color:#666;font-size:.75rem;cursor:pointer}
-.btn:active{background:#1a1a3a}
-.btn.g-btn{border-color:#00ff8833;color:#00ff88}
-.btn.r-btn{border-color:#ff444433;color:#ff6666}
-.hist{width:100%;max-width:370px;margin-bottom:20px}
-.hi{background:#0a0a1e;border:1px solid #111;border-radius:10px;
-    padding:10px 13px;margin-bottom:6px}
-.hc{color:#00ff88;font-size:.74rem;font-weight:700;margin-bottom:3px}
-.hr{color:#555;font-size:.76rem;line-height:1.45}
-.phelp{background:#1a0808;border:1px solid #ff444433;border-radius:10px;
-       padding:12px 16px;max-width:360px;width:100%;margin-bottom:12px;
-       font-size:.78rem;color:#ff9999;line-height:1.7;display:none}
-.hint{font-size:.68rem;color:#1a1a2e;text-align:center;max-width:300px;
-      line-height:1.6;margin-bottom:20px}
-.voice-enroll{background:#0a1a0a;border:1px solid #00ff8833;border-radius:12px;
-              padding:14px 18px;max-width:370px;width:100%;margin-bottom:14px;display:none}
-.ve-title{font-size:.72rem;color:#00ff88;font-weight:700;letter-spacing:.08em;margin-bottom:8px}
-.ve-bar{height:4px;background:#1a1a2e;border-radius:2px;margin-bottom:8px;overflow:hidden}
-.ve-fill{height:4px;background:#00ff88;border-radius:2px;transition:width .3s;width:0%}
-.ve-txt{font-size:.72rem;color:#00ff8888}
+.bar{width:4px;border-radius:2px;background:#00ff88}
+.bar:nth-child(1){height:8px;animation:wv .7s ease-in-out infinite}
+.bar:nth-child(2){height:20px;animation:wv .7s ease-in-out infinite .1s}
+.bar:nth-child(3){height:28px;animation:wv .7s ease-in-out infinite .2s}
+.bar:nth-child(4){height:16px;animation:wv .7s ease-in-out infinite .3s}
+.bar:nth-child(5){height:24px;animation:wv .7s ease-in-out infinite .4s}
+.bar:nth-child(6){height:12px;animation:wv .7s ease-in-out infinite .5s}
+.bar:nth-child(7){height:22px;animation:wv .7s ease-in-out infinite .15s}
+@keyframes wv{0%,100%{transform:scaleY(.3);opacity:.4}50%{transform:scaleY(1);opacity:1}}
+
+/* STATUS */
+.status{font-size:.82rem;color:#333;text-align:center;
+        min-height:22px;margin-bottom:10px;transition:color .3s}
+.status.active{color:#00ff8877}
+.status.thinking{color:#0088ff99}
+.status.speaking{color:#ffaa0099}
+.status.error{color:#ff444499}
+
+/* HEARD */
+.heard-box{background:#0a0a1e;border:1px solid #0d0d25;border-radius:10px;
+           padding:8px 16px;max-width:340px;width:100%;margin-bottom:12px;
+           font-size:.76rem;color:#00ff8844;font-style:italic;
+           text-align:center;min-height:32px;transition:all .3s;
+           display:flex;align-items:center;justify-content:center}
+.heard-box.active{border-color:#00ff8833;color:#00ff8899}
+.heard-box.triggered{border-color:#00ff88;color:#00ff88;background:#001a0a}
+
+/* REPLY */
+.reply-box{background:#0a0a1e;border:1px solid #1a1a3a;border-radius:14px;
+           padding:14px 18px;max-width:360px;width:100%;margin-bottom:16px;
+           display:none;animation:fadein .4s}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.reply-label{font-size:.58rem;color:#00ff88;letter-spacing:.12em;
+             font-weight:700;margin-bottom:6px}
+.reply-text{font-size:.9rem;color:#ccc;line-height:1.65}
+
+/* HISTORY */
+.hist-wrap{width:100%;max-width:360px}
+.hist-item{background:#08080f;border:1px solid #0d0d1a;border-radius:10px;
+           padding:9px 13px;margin-bottom:6px;animation:fadein .3s}
+.hist-cmd{color:#00ff8866;font-size:.72rem;font-weight:700;margin-bottom:3px}
+.hist-rep{color:#444;font-size:.74rem;line-height:1.45}
+
+/* BADGE ROW */
+.badge-row{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:18px}
+.badge{font-size:.6rem;color:#00ff8844;background:#030308;
+       border:1px solid #0d0d1a;border-radius:20px;padding:3px 10px}
+.badge.live{color:#00ff8888;border-color:#00ff8822}
+
+/* SETTINGS BUTTON */
+.settings-btn{position:fixed;top:16px;right:16px;background:#0a0a1e;
+              border:1px solid #1a1a3a;border-radius:50%;width:36px;height:36px;
+              display:flex;align-items:center;justify-content:center;
+              cursor:pointer;font-size:1rem;z-index:100}
+
+/* SETTINGS PANEL */
+.settings-panel{position:fixed;top:0;right:0;height:100vh;width:280px;
+                background:#080812;border-left:1px solid #1a1a3a;
+                padding:20px;z-index:200;transform:translateX(100%);
+                transition:transform .3s;overflow-y:auto}
+.settings-panel.open{transform:translateX(0)}
+.sp-title{font-size:.8rem;font-weight:700;color:#00ff88;letter-spacing:.1em;
+          margin-bottom:20px;display:flex;justify-content:space-between;align-items:center}
+.sp-close{cursor:pointer;font-size:1.2rem;color:#333}
+.sp-label{font-size:.68rem;color:#333;letter-spacing:.06em;margin-bottom:5px;margin-top:14px}
+.sp-input{width:100%;background:#050510;border:1px solid #1a1a3a;border-radius:8px;
+          padding:9px 12px;color:#fff;font-size:.85rem;outline:none}
+.sp-input::placeholder{color:#1a1a3a}
+.sp-btn{width:100%;margin-top:10px;background:#00ff8818;border:1px solid #00ff8833;
+        border-radius:8px;padding:10px;color:#00ff88;font-size:.82rem;cursor:pointer}
+.sp-info{font-size:.66rem;color:#1a1a3a;line-height:1.6;margin-top:16px}
 </style>
 </head>
 <body>
 
-<div class="logo">MUPPURI</div>
-<div class="sub">YOUR PERSONAL AI AGENT</div>
-<div class="ver">v4.0 · Voice Recognition · Self Learning · Always Ready</div>
+<!-- SETTINGS BUTTON -->
+<div class="settings-btn" onclick="toggleSettings()">⚙️</div>
 
-<div class="secret-row">
-  <input class="sinput" type="password" id="sec" placeholder="Secret word" autocomplete="off"/>
-  <button class="sbtn" onclick="saveSecret()">Save</button>
+<!-- SETTINGS PANEL -->
+<div class="settings-panel" id="settingsPanel">
+  <div class="sp-title">
+    <span>MUPPURI SETTINGS</span>
+    <span class="sp-close" onclick="toggleSettings()">✕</span>
+  </div>
+
+  <div class="sp-label">SECRET WORD</div>
+  <input class="sp-input" type="password" id="secretInput" placeholder="Enter your secret word" autocomplete="off"/>
+
+  <div class="sp-label">WAKE WORD (default: muppuri)</div>
+  <input class="sp-input" type="text" id="wakeInput" placeholder="muppuri" autocomplete="off"/>
+
+  <button class="sp-btn" onclick="saveSettings()">SAVE SETTINGS</button>
+
+  <div class="sp-info">
+    MUPPURI listens on this device continuously.<br><br>
+    Say your wake word then your command.<br><br>
+    Works on any phone, tablet, laptop, or computer anywhere in the world.<br><br>
+    Brain: muppuri-brain-production.up.railway.app<br><br>
+    Uptime: monitored by UptimeRobot every 5 min.
+  </div>
 </div>
 
-<div class="orb-area">
-  <div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div>
-  <div class="orb" id="orb" onclick="toggleListen()">
-    <div class="orb-icon" id="oIcon">🎙️</div>
-    <div class="orb-lbl" id="oLbl">TAP TO WAKE</div>
+<!-- MAIN UI -->
+<div class="logo">MUPPURI</div>
+<div class="tagline">YOUR PERSONAL AI AGENT · ALWAYS LISTENING</div>
+
+<!-- FIRST TIME SETUP (shown only if no secret) -->
+<div class="setup" id="setupBox">
+  <div class="setup-title">ENTER SECRET WORD TO ACTIVATE</div>
+  <div class="setup-row">
+    <input class="sinput" type="password" id="quickSecret" placeholder="your secret word" autocomplete="off"/>
+    <button class="sbtn" onclick="quickActivate()">ACTIVATE</button>
+  </div>
+</div>
+
+<div class="orb-wrap">
+  <div class="ring r1"></div>
+  <div class="ring r2"></div>
+  <div class="ring r3"></div>
+  <div class="orb idle" id="orb" onclick="orbTapped()">
+    <div class="orb-icon" id="orbIcon">🎙</div>
+    <div class="orb-state" id="orbState">TAP TO START</div>
   </div>
 </div>
 
 <div class="wave" id="wave">
   <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-  <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+  <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+  <div class="bar"></div>
 </div>
 
-<div class="st" id="st"><div class="dot g" id="dot"></div><span id="stTxt">Enter secret word → tap orb → say MUPPURI</span></div>
-<div class="heard" id="heard"></div>
+<div class="status" id="status">Enter secret word to begin</div>
+<div class="heard-box" id="heardBox">Waiting for your voice...</div>
 
-<div class="voice-enroll" id="enrollBox">
-  <div class="ve-title">🎤 ENROLLING YOUR VOICE — speak now</div>
-  <div class="ve-bar"><div class="ve-fill" id="enrollFill"></div></div>
-  <div class="ve-txt" id="enrollTxt">Say "MUPPURI activate" clearly 3 times</div>
+<div class="reply-box" id="replyBox">
+  <div class="reply-label">MUPPURI</div>
+  <div class="reply-text" id="replyText"></div>
 </div>
 
-<div class="reply-box" id="rbox"><div class="rlbl">MUPPURI SAYS</div><div class="rtxt" id="rtxt"></div></div>
-
-<div class="badges">
-  <div class="badge" id="b1">🧠 0 learned</div>
-  <div class="badge" id="b2">📡 Railway Cloud</div>
-  <div class="badge" id="b3">🔒 Secure</div>
-  <div class="badge" id="b4">🎤 Voice Ready</div>
+<div class="badge-row" id="badgeRow">
+  <div class="badge live" id="badgeStatus">⬤ Connecting...</div>
+  <div class="badge" id="badgeLearned">🧠 0 learned</div>
+  <div class="badge">📡 Railway 24/7</div>
 </div>
 
-<div class="phelp" id="phelp"></div>
-
-<div class="btns">
-  <button class="btn g-btn" onclick="testConn()">Test Brain</button>
-  <button class="btn g-btn" onclick="introduce()">Introduce</button>
-  <button class="btn" onclick="enrollVoice()">Enroll My Voice</button>
-  <button class="btn" onclick="typeCmd()">Type Command</button>
-  <button class="btn" onclick="showMem()">Memory</button>
-  <button class="btn r-btn" onclick="stopAll()">Stop</button>
-</div>
-
-<div class="hist" id="hist"></div>
-<div class="hint">Tap orb → say <strong style="color:#00ff8844">MUPPURI</strong> then your command<br>
-Works on any device · Chrome browser · mvs146.github.io/muppuri-brain</div>
+<div class="hist-wrap" id="histWrap"></div>
 
 <script>
-const BRAIN = "https://muppuri-brain-production.up.railway.app";
-let secret = localStorage.getItem("ms")||"";
-let listening=false, rec=null, speaking=false;
+// ═══════════════════════════════════════════════════
+// MUPPURI CORE — v5.0 Global Voice Agent
+// ═══════════════════════════════════════════════════
+
+const BRAIN = "https://muppuri-brain.onrender.com";
+
+// Telugu/Tamil/Indian English accent variants of MUPPURI
+// Every possible way an Indian voice says the word
+const WAKE_VARIANTS = [
+  "muppuri","mu puri","moo puri","mu poori","moopuri",
+  "mupuri","muppouri","mappuri","mu pur","mupoor",
+  "moopuri","muppuree","muppury","mupury","mu poor",
+  "moo poor","muppurie","muppore","mupore","muppurii",
+  "mu puree","moo puree","mupuree","muppuru","mu puru",
+  "moo puru","mupuru","muppari","muppori","mooppuri",
+  "muupuri","mupari","nuppuri","puppuri","moopure",
+  "mu pure","muppure","mupure","mu-puri","moo-puri"
+];
+
+let secret = localStorage.getItem("muppuri_secret") || "";
+let wakeWord = localStorage.getItem("muppuri_wake") || "muppuri";
+let listening = false, speaking = false, rec = null;
 const synth = window.speechSynthesis;
-let hist = JSON.parse(localStorage.getItem("mh")||"[]");
-let lc = parseInt(localStorage.getItem("lc")||"0");
+let history = JSON.parse(localStorage.getItem("muppuri_hist") || "[]");
+let learned = parseInt(localStorage.getItem("muppuri_lc") || "0");
+let autoStart = localStorage.getItem("muppuri_auto") === "true";
 
-// Voice enrollment — stores voice profile phrases
-let voiceProfile = JSON.parse(localStorage.getItem("vp")||"[]");
-let enrolling = false, enrollCount = 0;
+// ── INIT ────────────────────────────────────────────
+window.addEventListener("load", () => {
+  // Preload voices
+  synth.getVoices();
+  setTimeout(() => synth.getVoices(), 600);
+  setTimeout(() => synth.getVoices(), 1500);
 
-if(secret) document.getElementById("sec").value=secret;
-renderHist(); updateBadges();
+  renderHist();
+  updateBadges();
+  checkBrain();
 
-// ── SECRET ──────────────────────────────────────────
-function saveSecret(){
-  secret=document.getElementById("sec").value.trim();
-  localStorage.setItem("ms",secret);
-  setSt("Secret saved — tap the orb to activate","g");
-  speak("Secret word saved. I am ready.");
+  if(secret) {
+    document.getElementById("setupBox").style.display = "none";
+    document.getElementById("secretInput").value = secret;
+    document.getElementById("wakeInput").value = wakeWord;
+    // Auto-start listening
+    setTimeout(() => startListening(), 800);
+  }
+});
+
+// ── SETTINGS ────────────────────────────────────────
+function toggleSettings() {
+  document.getElementById("settingsPanel").classList.toggle("open");
+}
+function saveSettings() {
+  secret = document.getElementById("secretInput").value.trim();
+  wakeWord = document.getElementById("wakeInput").value.trim() || "muppuri";
+  localStorage.setItem("muppuri_secret", secret);
+  localStorage.setItem("muppuri_wake", wakeWord);
+  document.getElementById("setupBox").style.display = "none";
+  toggleSettings();
+  setStatus("Settings saved — MUPPURI is active", "active");
+  speak("Settings saved. I am ready. Say " + wakeWord + " followed by your command.");
+  if(!listening) startListening();
+}
+function quickActivate() {
+  secret = document.getElementById("quickSecret").value.trim();
+  if(!secret) { setStatus("Please enter your secret word", "error"); return; }
+  localStorage.setItem("muppuri_secret", secret);
+  document.getElementById("setupBox").style.display = "none";
+  document.getElementById("secretInput").value = secret;
+  setStatus("Activated — listening for " + wakeWord, "active");
+  speak("Activated. I am MUPPURI, your personal AI agent. Say MUPPURI followed by your command.");
+  startListening();
 }
 
-// ── STATUS ──────────────────────────────────────────
-function setSt(msg,c="g"){
-  document.getElementById("stTxt").textContent=msg;
-  document.getElementById("dot").className="dot "+c;
+// ── ORB ─────────────────────────────────────────────
+function orbTapped() {
+  if(!secret) {
+    document.getElementById("quickSecret").focus();
+    document.getElementById("setupBox").style.display = "block";
+    return;
+  }
+  if(speaking) { synth.cancel(); speaking = false; }
+  if(listening) {
+    stopListening();
+  } else {
+    startListening();
+  }
 }
-function setOrb(s){
-  const icons={on:"🎙️",think:"🧠",speak:"🔊",off:"🎙️"};
-  const lbls={on:"LISTENING",think:"THINKING",speak:"SPEAKING",off:"TAP TO WAKE"};
-  const o=document.getElementById("orb");
-  o.className="orb"+(s==="on"?" on":s==="think"?" thinking":s==="speak"?" speaking":"");
-  document.getElementById("oIcon").textContent=icons[s]||"🎙️";
-  document.getElementById("oLbl").textContent=lbls[s]||"TAP TO WAKE";
-  document.getElementById("wave").className="wave"+(s==="speak"?" show":"");
+function setOrbState(state) {
+  const orb = document.getElementById("orb");
+  const icon = document.getElementById("orbIcon");
+  const lbl = document.getElementById("orbState");
+  orb.className = "orb " + state;
+  const map = {
+    idle:     ["🎙", "TAP TO START"],
+    ready:    ["🎙", "LISTENING"],
+    heard:    ["✨", "HEARD YOU"],
+    thinking: ["🧠", "THINKING"],
+    speaking: ["🔊", "SPEAKING"],
+  };
+  const [ic, lb] = map[state] || map.idle;
+  icon.textContent = ic;
+  lbl.textContent = lb;
+  document.getElementById("wave").className = "wave" + (state === "speaking" ? " show" : "");
 }
-function setHeard(t){
-  document.getElementById("heard").textContent = t ? "Heard: "+t : "";
+
+// ── STATUS ───────────────────────────────────────────
+function setStatus(msg, cls = "") {
+  const el = document.getElementById("status");
+  el.textContent = msg;
+  el.className = "status " + cls;
+}
+function setHeard(text, triggered = false) {
+  const el = document.getElementById("heardBox");
+  el.textContent = text || "Listening...";
+  el.className = "heard-box" + (triggered ? " triggered" : text ? " active" : "");
 }
 
 // ── SPEAK ────────────────────────────────────────────
-function speak(text){
+function speak(text) {
   if(!text) return;
   synth.cancel();
-  const go=()=>{
-    const u=new SpeechSynthesisUtterance(text);
-    u.lang="en-IN"; u.rate=0.92; u.pitch=1.08; u.volume=1;
-    const vs=synth.getVoices();
-    const v=vs.find(x=>x.name.includes("Google")&&x.lang.startsWith("en"))||
-             vs.find(x=>x.lang==="en-IN")||vs.find(x=>x.lang.startsWith("en"))||vs[0];
-    if(v) u.voice=v;
-    u.onstart=()=>{speaking=true;setSt("MUPPURI speaking...","y");setOrb("speak")}
-    u.onend=()=>{speaking=false;
-      if(listening){setSt("Listening... say MUPPURI","g");setOrb("on")}
-      else{setSt("Tap orb to activate","g");setOrb("off")}
+  const go = () => {
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "en-IN";
+    u.rate = 0.9;
+    u.pitch = 1.05;
+    u.volume = 1;
+    const voices = synth.getVoices();
+    const preferred =
+      voices.find(v => v.name.includes("Google") && v.lang === "en-IN") ||
+      voices.find(v => v.name.includes("Google") && v.lang.startsWith("en")) ||
+      voices.find(v => v.lang === "en-IN") ||
+      voices.find(v => v.lang.startsWith("en-")) ||
+      voices[0];
+    if(preferred) u.voice = preferred;
+    u.onstart = () => {
+      speaking = true;
+      setOrbState("speaking");
+      setStatus("MUPPURI speaking...", "speaking");
     };
-    u.onerror=(e)=>{if(e.error!=="interrupted")console.warn("TTS:",e.error)};
+    u.onend = () => {
+      speaking = false;
+      if(listening) {
+        setOrbState("ready");
+        setStatus("Listening for " + wakeWord + "...", "active");
+        setHeard("Say " + wakeWord + " then your command");
+      } else {
+        setOrbState("idle");
+        setStatus("Tap orb to activate", "");
+      }
+    };
+    u.onerror = (e) => { if(e.error !== "interrupted") console.warn("TTS:", e.error); };
     synth.speak(u);
   };
-  synth.getVoices().length===0 ? (synth.onvoiceschanged=go) : go();
+  synth.getVoices().length === 0 ? (synth.onvoiceschanged = go) : go();
 }
 
-// ── SEND COMMAND ─────────────────────────────────────
-async function sendCmd(cmd){
-  if(!cmd.trim()) return;
-  if(!secret){setSt("Enter secret word first","r");speak("Please enter your secret word.");return}
-  setSt("Thinking...","b"); setOrb("think");
-  document.getElementById("phelp").style.display="none";
-  lc++; localStorage.setItem("lc",lc); updateBadges();
-  try{
-    const res=await fetch(BRAIN+"/voice",{
-      method:"POST",headers:{"Content-Type":"application/json"},mode:"cors",
-      body:JSON.stringify({transcript:cmd,secret})
-    });
-    if(!res.ok){
-      const e=await res.json().catch(()=>({}));
-      if(res.status===403){setSt("Wrong secret word","r");speak("Wrong secret word.");setOrb(listening?"on":"off");return}
-    }
-    const d=await res.json();
-    const reply=d.reply||"Command received.";
-    document.getElementById("rbox").style.display="block";
-    document.getElementById("rtxt").textContent=reply;
-    addHist(cmd,reply);
-    speak(reply);
-  }catch(e){
-    setSt("Brain offline — check Railway","r");
-    speak("Cannot reach my brain. Please check Railway is online.");
-    setOrb(listening?"on":"off");
-    showHelp("Connection Error: Open railway.app → check muppuri-brain shows Online → then refresh this page.");
+// ── DETECT WAKE WORD ─────────────────────────────────
+function isWakeWord(text) {
+  const t = text.toLowerCase().replace(/[.,!?]/g, "").trim();
+  // Check custom wake word first
+  if(t.includes(wakeWord.toLowerCase())) return true;
+  // Check all accent variants
+  return WAKE_VARIANTS.some(v => t.includes(v));
+}
+
+function extractCommand(text) {
+  const t = text.toLowerCase().replace(/[.,!?]/g, "");
+  // Try custom wake word
+  const wi = t.indexOf(wakeWord.toLowerCase());
+  if(wi !== -1) {
+    const after = text.substring(wi + wakeWord.length).trim();
+    if(after.length > 0) return after;
   }
+  // Try each accent variant
+  for(const v of WAKE_VARIANTS) {
+    const idx = t.indexOf(v);
+    if(idx !== -1) {
+      const after = text.substring(idx + v.length).trim();
+      if(after.length > 0) return after;
+    }
+  }
+  // Regex fallback for broken variants
+  const m = t.match(/mu[\s-]?p[uo][or][iu][rie]?\s+(.*)/);
+  if(m && m[1]) return m[1].trim();
+  return "";
 }
 
 // ── VOICE RECOGNITION ────────────────────────────────
-function startRec(){
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){speak("Please use Google Chrome for voice commands.");return}
-  rec=new SR(); rec.continuous=true; rec.interimResults=true; rec.lang="en-IN";
-  let finalTimer=null, lastFinal="";
+function startListening() {
+  if(listening) return;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR) {
+    setStatus("Use Chrome browser for voice", "error");
+    speak("Please use Google Chrome browser for voice commands.");
+    return;
+  }
+  listening = true;
+  rec = new SR();
+  rec.continuous = true;
+  rec.interimResults = true;
+  rec.lang = "en-IN";
+  let cmdTimer = null;
+  let pendingCmd = "";
 
-  rec.onresult=(e)=>{
-    let interim="",final="";
-    for(let i=e.resultIndex;i<e.results.length;i++){
-      if(e.results[i].isFinal) final+=e.results[i][0].transcript+" ";
-      else interim+=e.results[i][0].transcript;
+  rec.onresult = (e) => {
+    let interim = "", final = "";
+    for(let i = e.resultIndex; i < e.results.length; i++) {
+      if(e.results[i].isFinal) final += e.results[i][0].transcript + " ";
+      else interim += e.results[i][0].transcript;
     }
-    const heard=(final||interim).toLowerCase().trim();
-    setHeard(heard);
+    const heard = (final || interim).trim();
+    if(!heard) return;
 
-    if(heard.includes("muppuri")){
-      const parts=heard.split("muppuri");
-      const cmd=parts.slice(1).join("muppuri").trim();
-      clearTimeout(finalTimer);
-      if(cmd.length>1){
-        finalTimer=setTimeout(()=>{
-          if(!speaking){
-            speak("Yes.");
-            sendCmd(cmd);
+    const triggered = isWakeWord(heard);
+    setHeard(heard, triggered);
+
+    if(triggered) {
+      setOrbState("heard");
+      const cmd = extractCommand(heard);
+      clearTimeout(cmdTimer);
+      if(cmd.length > 1) {
+        pendingCmd = cmd;
+        // Wait 1 second after detecting command before sending
+        cmdTimer = setTimeout(() => {
+          if(pendingCmd && !speaking) {
+            processCommand(pendingCmd);
+            pendingCmd = "";
           }
-        },1200);
-      } else if(final.toLowerCase().includes("muppuri")){
-        speak("Yes? What do you need?");
-        setSt("Say your command now...","g");
-      }
-    }
-    // Voice enrollment detection
-    if(enrolling && heard.includes("muppuri activate")){
-      enrollCount++;
-      const pct=Math.min(100,enrollCount*33);
-      document.getElementById("enrollFill").style.width=pct+"%";
-      if(enrollCount>=3){
-        enrolling=false;
-        voiceProfile.push(Date.now());
-        localStorage.setItem("vp",JSON.stringify(voiceProfile));
-        document.getElementById("enrollBox").style.display="none";
-        speak("Voice enrolled successfully. I now recognise your voice.");
-        document.getElementById("b4").textContent="🎤 Voice Enrolled";
-        enrollCount=0;
+        }, 1000);
       } else {
-        document.getElementById("enrollTxt").textContent=`Good! Say it ${3-enrollCount} more time${enrollCount<2?"s":""}`;
-        speak("Good. Say it again.");
+        // Wake word said but no command yet
+        setStatus("Say your command...", "active");
+        // Wait for next speech
+        cmdTimer = setTimeout(() => {
+          if(!pendingCmd && listening) {
+            setOrbState("ready");
+            setStatus("Listening for " + wakeWord + "...", "active");
+          }
+        }, 3000);
       }
     }
   };
 
-  rec.onerror=(e)=>{
-    if(e.error==="not-allowed"||e.error==="permission-denied"){
-      showHelp("🎤 Allow microphone: Click the 🔒 lock icon in the address bar → Site settings → Microphone → Allow → Refresh page");
-      setSt("Microphone blocked — see instructions below","r");
-      speak("Microphone is blocked. Please allow microphone access in your browser.");
-      listening=false; setOrb("off");
-    }else if(e.error==="network"){
-      setSt("Network error","r");
-    }else if(e.error!=="no-speech"&&e.error!=="aborted"){
-      console.warn("Rec:",e.error);
+  rec.onerror = (e) => {
+    if(e.error === "not-allowed" || e.error === "permission-denied") {
+      listening = false;
+      setOrbState("idle");
+      setStatus("Microphone blocked — click 🔒 in address bar → Allow", "error");
+      speak("Microphone is blocked. Please allow microphone access in your browser settings.");
+    } else if(e.error === "network") {
+      setStatus("Network error — check internet", "error");
+    } else if(e.error !== "no-speech" && e.error !== "aborted") {
+      console.warn("Speech error:", e.error);
     }
   };
 
-  rec.onend=()=>{
-    if(listening) setTimeout(()=>{if(listening)try{rec.start()}catch(e){}},300);
+  rec.onend = () => {
+    if(listening) {
+      setTimeout(() => {
+        if(listening && rec) {
+          try { rec.start(); } catch(e) {}
+        }
+      }, 200);
+    }
   };
 
-  try{rec.start();}catch(e){console.warn(e);}
-  setSt("Listening... say MUPPURI then your command","g");
-  setOrb("on");
+  try { rec.start(); } catch(e) { console.warn(e); }
+
+  setOrbState("ready");
+  setStatus("Listening for " + wakeWord + "...", "active");
+  setHeard("Say " + wakeWord + " then your command");
 }
 
-function toggleListen(){
-  if(speaking){synth.cancel();speaking=false;}
-  listening=!listening;
-  if(listening){
-    if(!secret){setSt("Enter secret word first","r");listening=false;return}
-    document.getElementById("phelp").style.display="none";
-    startRec();
-  }else{
-    if(rec)try{rec.abort()}catch(e){}
-    synth.cancel(); setOrb("off");
-    setSt("Tap orb to activate","g"); setHeard("");
+function stopListening() {
+  listening = false;
+  if(rec) try { rec.abort(); } catch(e) {}
+  synth.cancel();
+  speaking = false;
+  setOrbState("idle");
+  setStatus("Tap orb to activate", "");
+  setHeard("Tap orb to start listening");
+}
+
+// ── SEND TO BRAIN ────────────────────────────────────
+async function processCommand(cmd) {
+  if(!secret) { speak("Please enter your secret word first."); return; }
+  if(!cmd || !cmd.trim()) return;
+
+  setOrbState("thinking");
+  setStatus("Processing: " + cmd.substring(0, 40) + "...", "thinking");
+  learned++;
+  localStorage.setItem("muppuri_lc", learned);
+  updateBadges();
+
+  try {
+    const res = await fetch(BRAIN + "/voice", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      mode: "cors",
+      body: JSON.stringify({ transcript: cmd, secret: secret })
+    });
+
+    if(res.status === 403) {
+      setStatus("Wrong secret word", "error");
+      speak("Wrong secret word. Please check your settings.");
+      setOrbState("ready");
+      return;
+    }
+
+    const data = await res.json();
+    const reply = data.reply || "Command received.";
+
+    // Show reply
+    document.getElementById("replyBox").style.display = "block";
+    document.getElementById("replyText").textContent = reply;
+
+    // Add to history
+    addHistory(cmd, reply);
+
+    // Speak reply
+    speak(reply);
+
+  } catch(e) {
+    setOrbState("ready");
+    setStatus("Brain offline — check Railway", "error");
+    speak("Cannot reach my brain server. Please check your internet connection.");
+    console.error(e);
   }
 }
 
-function stopAll(){
-  listening=false; speaking=false;
-  if(rec)try{rec.abort()}catch(e){}
-  synth.cancel(); setOrb("off");
-  setSt("Stopped","g");
-}
-
-// ── VOICE ENROLLMENT ─────────────────────────────────
-function enrollVoice(){
-  if(!listening){speak("Please activate listening first by tapping the orb.");return}
-  enrolling=true; enrollCount=0;
-  document.getElementById("enrollBox").style.display="block";
-  document.getElementById("enrollFill").style.width="0%";
-  document.getElementById("enrollTxt").textContent="Say 'MUPPURI activate' clearly 3 times";
-  speak("Voice enrollment started. Please say MUPPURI activate three times clearly.");
-}
-
-// ── QUICK ACTIONS ─────────────────────────────────────
-async function testConn(){
-  setSt("Testing...","b");
-  try{
-    const r=await fetch(BRAIN+"/health",{mode:"cors"});
-    const d=await r.json();
-    setSt("Connected: "+d.status,"g");
-    speak("Brain connected. MUPPURI is fully operational.");
-  }catch(e){
-    setSt("Cannot reach brain","r");
-    speak("Connection failed. Check Railway.");
-    showHelp("Open railway.app → check muppuri-brain is Online → refresh this page");
+// ── BRAIN HEALTH CHECK ───────────────────────────────
+async function checkBrain() {
+  try {
+    const r = await fetch(BRAIN + "/health", { mode: "cors" });
+    const d = await r.json();
+    document.getElementById("badgeStatus").textContent = "⬤ Online";
+    document.getElementById("badgeStatus").style.color = "#00ff88";
+  } catch(e) {
+    document.getElementById("badgeStatus").textContent = "⬤ Offline";
+    document.getElementById("badgeStatus").style.color = "#ff4444";
   }
 }
 
-function introduce(){
-  sendCmd("Introduce yourself as MUPPURI in 2 sentences. Say your name and your top 3 capabilities.");
-}
-function typeCmd(){
-  const c=prompt("Type your command:");
-  if(c&&c.trim()){setHeard(c.trim());sendCmd(c.trim());}
-}
-async function showMem(){
-  sendCmd("How many things have you learned about me? Summarise our conversation history in 2 sentences.");
-}
-
-// ── HELPERS ───────────────────────────────────────────
-function addHist(cmd,reply){
-  hist.unshift({cmd,reply:reply.substring(0,180),t:new Date().toLocaleTimeString()});
-  if(hist.length>8)hist.pop();
-  localStorage.setItem("mh",JSON.stringify(hist));
+// ── HISTORY ──────────────────────────────────────────
+function addHistory(cmd, reply) {
+  history.unshift({ cmd, reply: reply.substring(0, 160), t: new Date().toLocaleTimeString() });
+  if(history.length > 6) history.pop();
+  localStorage.setItem("muppuri_hist", JSON.stringify(history));
   renderHist();
 }
-function renderHist(){
-  document.getElementById("hist").innerHTML=hist.map(h=>
-    `<div class="hi">
-      <div class="hc">🧑 ${h.cmd} <span style="color:#222;font-weight:400;font-size:.67rem">${h.t||""}</span></div>
-      <div class="hr">🤖 ${h.reply}</div>
-    </div>`).join("");
-}
-function updateBadges(){
-  document.getElementById("b1").textContent="🧠 "+lc+" learned";
-}
-function showHelp(msg){
-  const el=document.getElementById("phelp");
-  el.style.display="block"; el.innerHTML=msg;
+
+function renderHist() {
+  document.getElementById("histWrap").innerHTML = history.map(h =>
+    `<div class="hist-item">
+      <div class="hist-cmd">🧑 ${h.cmd} <span style="color:#111;font-weight:400;font-size:.65rem">${h.t || ""}</span></div>
+      <div class="hist-rep">🤖 ${h.reply}</div>
+    </div>`
+  ).join("");
 }
 
-// Preload voices
-window.addEventListener("load",()=>{
-  synth.getVoices();
-  setTimeout(()=>synth.getVoices(),800);
-  setTimeout(()=>synth.getVoices(),2000);
+function updateBadges() {
+  document.getElementById("badgeLearned").textContent = "🧠 " + learned + " learned";
+}
+
+// ── CLOSE SETTINGS ON OUTSIDE CLICK ──────────────────
+document.addEventListener("click", (e) => {
+  const panel = document.getElementById("settingsPanel");
+  const btn = document.querySelector(".settings-btn");
+  if(panel.classList.contains("open") && !panel.contains(e.target) && !btn.contains(e.target)) {
+    panel.classList.remove("open");
+  }
 });
+
+// Check brain every 5 minutes
+setInterval(checkBrain, 300000);
 </script>
 </body>
 </html>
