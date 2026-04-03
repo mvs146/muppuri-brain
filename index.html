@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#050510">
+<title>MUPPURI</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:#050510;color:#fff;font-family:Arial,sans-serif;
+          overflow-x:hidden;touch-action:manipulation}
+body{display:flex;flex-direction:column;align-items:center;
+     justify-content:center;min-height:100vh;padding:20px 16px}
+.logo{font-size:2.8rem;font-weight:900;letter-spacing:.2em;color:#00ff88;margin-bottom:2px}
+.sub{font-size:.65rem;color:#1a1a3a;letter-spacing:.12em;margin-bottom:22px}
+
+/* SETUP */
+.setup{width:100%;max-width:300px;margin-bottom:22px;background:#0a0a1e;
+       border:1px solid #1a1a3a;border-radius:14px;padding:16px;text-align:center}
+.setup-title{font-size:.7rem;color:#00ff8877;font-weight:700;
+             letter-spacing:.1em;margin-bottom:10px}
+.setup-row{display:flex;gap:8px}
+.sinput{flex:1;background:#050510;border:1px solid #1a1a3a;border-radius:9px;
+        padding:10px 12px;color:#fff;font-size:.9rem;outline:none;text-align:center}
+.sinput::placeholder{color:#1a1a3a;font-size:.75rem}
+.sbtn{background:#00ff8818;border:1px solid #00ff8833;border-radius:9px;
+      padding:10px 14px;color:#00ff88;font-size:.8rem;cursor:pointer}
+
+/* ORB */
+.orb-area{position:relative;width:190px;height:190px;
+          display:flex;align-items:center;justify-content:center;margin-bottom:20px}
+.ring{position:absolute;border-radius:50%;border:1px solid #00ff8810;pointer-events:none}
+.r1{width:190px;height:190px;animation:rp 3s ease-in-out infinite}
+.r2{width:228px;height:228px;animation:rp 3s ease-in-out infinite 1s}
+.r3{width:266px;height:266px;animation:rp 3s ease-in-out infinite 2s}
+@keyframes rp{0%,100%{opacity:.5;transform:scale(.97)}50%{opacity:.08;transform:scale(1.03)}}
+.orb{width:155px;height:155px;border-radius:50%;cursor:pointer;z-index:2;
+     background:radial-gradient(circle at 38% 35%,#00ff88 0%,#0044cc 60%,#001133 100%);
+     display:flex;flex-direction:column;align-items:center;justify-content:center;
+     box-shadow:0 0 60px #00ff8822;transition:transform .15s;user-select:none}
+.orb:active{transform:scale(.9)}
+.orb.ready{box-shadow:0 0 90px #00ff8855;animation:oready 2.5s ease-in-out infinite}
+.orb.heard{box-shadow:0 0 160px #00ff88cc;animation:oheard .5s ease-in-out infinite}
+.orb.thinking{animation:othink .7s ease-in-out infinite}
+.orb.speaking{animation:ospeak .45s ease-in-out infinite}
+@keyframes oready{0%,100%{box-shadow:0 0 60px #00ff8833}50%{box-shadow:0 0 130px #00ff8877}}
+@keyframes oheard{0%,100%{box-shadow:0 0 110px #00ff88bb}50%{box-shadow:0 0 200px #00ff88ff}}
+@keyframes othink{0%,100%{box-shadow:0 0 60px #0088ff33}50%{box-shadow:0 0 130px #0088ffaa}}
+@keyframes ospeak{0%,100%{box-shadow:0 0 70px #ffaa0033}50%{box-shadow:0 0 140px #ffaa00bb}}
+.orb-icon{font-size:2.6rem;margin-bottom:3px}
+.orb-lbl{font-size:.54rem;font-weight:800;letter-spacing:.16em;color:rgba(0,0,0,.7)}
+
+/* WAVEFORM */
+.wave{display:none;align-items:flex-end;justify-content:center;gap:3px;
+      height:28px;margin-bottom:10px}
+.wave.on{display:flex}
+.b{width:4px;border-radius:2px;background:#00ff88;animation:wv .75s ease-in-out infinite}
+.b:nth-child(1){height:8px}.b:nth-child(2){height:20px;animation-delay:.1s}
+.b:nth-child(3){height:26px;animation-delay:.2s}.b:nth-child(4){height:14px;animation-delay:.3s}
+.b:nth-child(5){height:22px;animation-delay:.4s}.b:nth-child(6){height:10px;animation-delay:.5s}
+.b:nth-child(7){height:24px;animation-delay:.15s}
+@keyframes wv{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
+
+/* STATUS */
+.st{font-size:.82rem;color:#1e1e3a;text-align:center;min-height:20px;
+    margin-bottom:8px;transition:color .3s}
+.st.on{color:#00ff8866}.st.think{color:#0088ff77}
+.st.speak{color:#ffaa0077}.st.err{color:#ff444477}
+
+/* HEARD */
+.heard{background:#08080f;border:1px solid #0d0d1a;border-radius:10px;
+       padding:7px 16px;max-width:340px;width:100%;margin-bottom:10px;
+       font-size:.76rem;color:#1a1a3a;font-style:italic;
+       text-align:center;min-height:30px;transition:all .3s}
+.heard.active{color:#00ff8888;border-color:#00ff8822}
+.heard.triggered{color:#00ff88;border-color:#00ff8866;background:#001a08}
+
+/* REPLY */
+.reply{background:#0a0a1e;border:1px solid #1a1a3a;border-radius:14px;
+       padding:14px 18px;max-width:360px;width:100%;margin-bottom:14px;
+       display:none;animation:fi .4s}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.reply-lbl{font-size:.56rem;color:#00ff88;letter-spacing:.12em;font-weight:700;margin-bottom:5px}
+.reply-txt{font-size:.9rem;color:#ccc;line-height:1.65}
+
+/* BADGES */
+.badges{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:16px}
+.badge{font-size:.6rem;color:#00ff8833;background:#030308;
+       border:1px solid #0a0a1a;border-radius:20px;padding:3px 10px}
+.badge.live{color:#00ff8899;border-color:#00ff8822}
+.badge.dead{color:#ff444477;border-color:#ff444422}
+
+/* HISTORY */
+.hist{width:100%;max-width:360px}
+.hi{background:#06060f;border:1px solid #0d0d1a;border-radius:10px;
+    padding:9px 12px;margin-bottom:6px;animation:fi .3s}
+.hc{color:#00ff8855;font-size:.72rem;font-weight:700;margin-bottom:3px}
+.hr{color:#333;font-size:.75rem;line-height:1.4}
+
+/* SETTINGS */
+.gear{position:fixed;top:14px;right:14px;background:#08080f;
+      border:1px solid #1a1a3a;border-radius:50%;width:38px;height:38px;
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;font-size:1.1rem;z-index:100}
+.panel{position:fixed;top:0;right:0;height:100vh;width:290px;
+       background:#060610;border-left:1px solid #1a1a3a;padding:22px 18px;
+       z-index:200;transform:translateX(100%);transition:transform .3s;
+       overflow-y:auto}
+.panel.open{transform:translateX(0)}
+.ptitle{font-size:.78rem;font-weight:700;color:#00ff88;letter-spacing:.1em;
+        margin-bottom:18px;display:flex;justify-content:space-between}
+.pclose{cursor:pointer;color:#222;font-size:1.2rem}
+.plbl{font-size:.66rem;color:#222;letter-spacing:.06em;margin:12px 0 5px}
+.pinput{width:100%;background:#050510;border:1px solid #1a1a3a;
+        border-radius:8px;padding:9px 12px;color:#fff;font-size:.85rem;outline:none}
+.pbtn{width:100%;margin-top:10px;background:#00ff8818;border:1px solid #00ff8833;
+      border-radius:8px;padding:10px;color:#00ff88;font-size:.82rem;cursor:pointer}
+.pinfo{font-size:.64rem;color:#111;line-height:1.7;margin-top:14px}
+.hint{font-size:.62rem;color:#0d0d1a;text-align:center;
+      max-width:300px;line-height:1.6;margin-bottom:16px}
+</style>
+</head>
+<body>
+
+<div class="gear" onclick="togglePanel()">⚙️</div>
+<div class="panel" id="panel">
+  <div class="ptitle">MUPPURI SETTINGS <span class="pclose" onclick="togglePanel()">✕</span></div>
+  <div class="plbl">SECRET WORD</div>
+  <input class="pinput" type="password" id="pSecret" placeholder="your secret word" autocomplete="off"/>
+  <div class="plbl">WAKE WORD</div>
+  <input class="pinput" type="text" id="pWake" placeholder="muppuri" autocomplete="off"/>
+  <button class="pbtn" onclick="saveSettings()">SAVE &amp; ACTIVATE</button>
+  <div class="pinfo">
+    Brain: muppuri-brain.onrender.com<br>
+    Free forever on Render + GitHub Pages<br>
+    Uptime monitored by UptimeRobot<br><br>
+    MUPPURI knows everything —<br>
+    science, history, technology, medicine,<br>
+    business, law, all languages, coding,<br>
+    current events, and much more.<br><br>
+    Say MUPPURI then your command.<br>
+    Works on any device worldwide.
+  </div>
+</div>
+
+<div class="logo">MUPPURI</div>
+<div class="sub">YOUR PERSONAL AI AGENT · ALWAYS LISTENING</div>
+
+<div class="setup" id="setup">
+  <div class="setup-title">ENTER SECRET WORD TO ACTIVATE</div>
+  <div class="setup-row">
+    <input class="sinput" type="password" id="qSecret" placeholder="secret word" autocomplete="off"/>
+    <button class="sbtn" onclick="quickActivate()">GO</button>
+  </div>
+</div>
+
+<div class="orb-area">
+  <div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div>
+  <div class="orb idle" id="orb" onclick="orbTap()">
+    <div class="orb-icon" id="oIcon">🎙</div>
+    <div class="orb-lbl" id="oLbl">TAP TO START</div>
+  </div>
+</div>
+
+<div class="wave" id="wave">
+  <div class="b"></div><div class="b"></div><div class="b"></div>
+  <div class="b"></div><div class="b"></div><div class="b"></div><div class="b"></div>
+</div>
+
+<div class="st" id="st">Enter secret word to begin</div>
+<div class="heard" id="heard">Waiting...</div>
+
+<div class="reply" id="reply">
+  <div class="reply-lbl">MUPPURI</div>
+  <div class="reply-txt" id="rtxt"></div>
+</div>
+
+<div class="badges">
+  <div class="badge" id="bStatus">⬤ Checking...</div>
+  <div class="badge" id="bLearned">🧠 0 learned</div>
+  <div class="badge">📡 Render Free</div>
+  <div class="badge">🌍 World Knowledge</div>
+</div>
+
+<div class="hist" id="hist"></div>
+<div class="hint">Say MUPPURI then your command<br>Instant voice · Any device · Free forever</div>
+
+<script>
+const BRAIN = "https://muppuri-brain.onrender.com";
+
+// ALL accent variants of MUPPURI for Telugu/Tamil/Indian English
+const WAKE_V = [
+  "muppuri","mu puri","moo puri","mu poori","moopuri","mupuri",
+  "muppouri","mappuri","mu pur","mupoor","moopuri","muppuree",
+  "muppury","mupury","mu poor","moo poor","muppurie","muppore",
+  "mupore","muppurii","mu puree","moo puree","mupuree","muppuru",
+  "mu puru","moo puru","mupuru","muppari","muppori","mooppuri",
+  "muupuri","mupari","moopure","mu pure","muppure","mupure",
+  "mu-puri","moo-puri","nuppuri","buppuri","m puri","muppuris"
+];
+
+let secret = localStorage.getItem("ms") || "";
+let wakeWord = localStorage.getItem("mw") || "muppuri";
+let listening = false, speaking = false, rec = null;
+const synth = window.speechSynthesis;
+let hist = JSON.parse(localStorage.getItem("mh") || "[]");
+let lc = parseInt(localStorage.getItem("lc") || "0");
+
+// Init
+window.addEventListener("load", () => {
+  // Aggressively preload voices
+  const loadVoices = () => synth.getVoices();
+  loadVoices();
+  [200, 500, 1000, 2000].forEach(t => setTimeout(loadVoices, t));
+
+  if(secret) {
+    document.getElementById("setup").style.display = "none";
+    document.getElementById("pSecret").value = secret;
+    document.getElementById("pWake").value = wakeWord;
+    setTimeout(() => startListening(), 600);
+  }
+  renderHist();
+  updateBadges();
+  checkBrain();
+  setInterval(checkBrain, 120000); // check every 2 min
+});
+
+// Settings
+function togglePanel() {
+  document.getElementById("panel").classList.toggle("open");
+}
+function saveSettings() {
+  secret = document.getElementById("pSecret").value.trim();
+  wakeWord = (document.getElementById("pWake").value.trim() || "muppuri").toLowerCase();
+  localStorage.setItem("ms", secret);
+  localStorage.setItem("mw", wakeWord);
+  document.getElementById("setup").style.display = "none";
+  togglePanel();
+  setSt("Settings saved — MUPPURI activated", "on");
+  if(!listening) startListening();
+  else speak("Settings updated. I am ready.");
+}
+function quickActivate() {
+  secret = document.getElementById("qSecret").value.trim();
+  if(!secret) { setSt("Enter your secret word", "err"); return; }
+  localStorage.setItem("ms", secret);
+  document.getElementById("setup").style.display = "none";
+  document.getElementById("pSecret").value = secret;
+  startListening();
+}
+
+// Orb
+function orbTap() {
+  if(!secret) { document.getElementById("qSecret").focus(); return; }
+  if(speaking) { synth.cancel(); speaking = false; }
+  listening ? stopListening() : startListening();
+}
+function setOrb(s) {
+  const o = document.getElementById("orb");
+  const icons = {idle:"🎙",ready:"🎙",heard:"✨",thinking:"🧠",speaking:"🔊"};
+  const lbls = {idle:"TAP TO START",ready:"LISTENING",heard:"HEARD",thinking:"THINKING",speaking:"SPEAKING"};
+  o.className = "orb " + s;
+  document.getElementById("oIcon").textContent = icons[s] || "🎙";
+  document.getElementById("oLbl").textContent = lbls[s] || "TAP TO START";
+  document.getElementById("wave").className = "wave" + (s === "speaking" ? " on" : "");
+}
+
+// Status + Heard
+function setSt(msg, c = "") {
+  const el = document.getElementById("st");
+  el.textContent = msg; el.className = "st " + c;
+}
+function setHeard(t, trig = false) {
+  const el = document.getElementById("heard");
+  el.textContent = t || "Listening...";
+  el.className = "heard" + (trig ? " triggered" : t ? " active" : "");
+}
+
+// SPEAK — instant voice response
+function speak(text) {
+  if(!text) return;
+  synth.cancel();
+  const go = () => {
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "en-IN"; u.rate = 0.92; u.pitch = 1.08; u.volume = 1;
+    const vs = synth.getVoices();
+    const v =
+      vs.find(x => x.name.includes("Google") && x.lang === "en-IN") ||
+      vs.find(x => x.name.includes("Google") && x.lang.startsWith("en")) ||
+      vs.find(x => x.lang === "en-IN") ||
+      vs.find(x => x.lang.startsWith("en")) || vs[0];
+    if(v) u.voice = v;
+    u.onstart = () => {
+      speaking = true;
+      setOrb("speaking");
+      setSt("Speaking...", "speak");
+    };
+    u.onend = () => {
+      speaking = false;
+      if(listening) { setOrb("ready"); setSt("Listening for " + wakeWord + "...", "on"); }
+      else { setOrb("idle"); setSt("Tap orb to activate", ""); }
+    };
+    u.onerror = e => { if(e.error !== "interrupted") console.warn("TTS:", e.error); };
+    synth.speak(u);
+  };
+  synth.getVoices().length ? go() : (synth.onvoiceschanged = go);
+}
+
+// Wake word detection
+function isWake(text) {
+  const t = text.toLowerCase().replace(/[.,!?]/g, "").trim();
+  if(t.includes(wakeWord)) return true;
+  return WAKE_V.some(v => t.includes(v));
+}
+function extractCmd(text) {
+  const t = text.toLowerCase().replace(/[.,!?]/g, "");
+  if(t.includes(wakeWord)) {
+    const after = text.substring(t.indexOf(wakeWord) + wakeWord.length).trim();
+    if(after.length > 0) return after;
+  }
+  for(const v of WAKE_V) {
+    const idx = t.indexOf(v);
+    if(idx !== -1) {
+      const after = text.substring(idx + v.length).trim();
+      if(after.length > 0) return after;
+    }
+  }
+  const m = t.match(/mu[\s-]?p[uo][or][iu][rie]?\s+(.*)/);
+  return m && m[1] ? m[1].trim() : "";
+}
+
+// Voice recognition
+function startListening() {
+  if(listening) return;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR) { setSt("Use Chrome browser", "err"); return; }
+  listening = true;
+  rec = new SR();
+  rec.continuous = true;
+  rec.interimResults = true;
+  rec.lang = "en-IN";
+  let timer = null, pending = "";
+
+  rec.onresult = e => {
+    let interim = "", final = "";
+    for(let i = e.resultIndex; i < e.results.length; i++) {
+      if(e.results[i].isFinal) final += e.results[i][0].transcript + " ";
+      else interim += e.results[i][0].transcript;
+    }
+    const heard = (final || interim).trim();
+    if(!heard) return;
+    const trig = isWake(heard);
+    setHeard(heard, trig);
+    if(trig) {
+      setOrb("heard");
+      const cmd = extractCmd(heard);
+      clearTimeout(timer);
+      if(cmd.length > 1) {
+        pending = cmd;
+        timer = setTimeout(() => {
+          if(pending && !speaking) { processCmd(pending); pending = ""; }
+        }, 800); // 800ms wait — faster than before
+      } else {
+        setSt("Say your command...", "on");
+      }
+    }
+  };
+
+  rec.onerror = e => {
+    if(e.error === "not-allowed" || e.error === "permission-denied") {
+      listening = false; setOrb("idle");
+      setSt("Mic blocked — click lock icon → Allow Microphone", "err");
+      speak("Microphone is blocked. Please allow microphone access.");
+    }
+  };
+
+  rec.onend = () => {
+    if(listening) setTimeout(() => { try { rec.start(); } catch(e) {} }, 150);
+  };
+
+  try { rec.start(); } catch(e) { console.warn(e); }
+  setOrb("ready");
+  setSt("Listening for " + wakeWord + "...", "on");
+  setHeard("Say " + wakeWord + " then your command");
+}
+
+function stopListening() {
+  listening = false;
+  if(rec) try { rec.abort(); } catch(e) {}
+  synth.cancel(); speaking = false;
+  setOrb("idle"); setSt("Tap orb to activate", "");
+}
+
+// Process command — send to brain
+async function processCmd(cmd) {
+  if(!secret || !cmd.trim()) return;
+  setOrb("thinking");
+  setSt("Thinking...", "think");
+  lc++; localStorage.setItem("lc", lc); updateBadges();
+
+  // Wake the brain first if sleeping (Render free tier sleeps)
+  try {
+    const res = await fetch(BRAIN + "/voice", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      mode: "cors",
+      body: JSON.stringify({ transcript: cmd, secret })
+    });
+
+    if(res.status === 403) {
+      setSt("Wrong secret word", "err");
+      speak("Wrong secret word. Please check settings.");
+      setOrb(listening ? "ready" : "idle");
+      return;
+    }
+
+    const data = await res.json();
+    const reply = data.reply || "Command received.";
+    document.getElementById("reply").style.display = "block";
+    document.getElementById("rtxt").textContent = reply;
+    addHist(cmd, reply);
+    speak(reply);
+
+  } catch(e) {
+    setSt("Brain waking up — please wait 30 seconds and repeat", "err");
+    speak("My brain is waking up. Please say your command again in 30 seconds.");
+    setOrb(listening ? "ready" : "idle");
+    // Auto-retry after 35 seconds
+    setTimeout(() => {
+      if(listening) setSt("Ready — say " + wakeWord + " again", "on");
+    }, 35000);
+  }
+}
+
+// History
+function addHist(cmd, reply) {
+  hist.unshift({ cmd, reply: reply.substring(0, 180), t: new Date().toLocaleTimeString() });
+  if(hist.length > 5) hist.pop();
+  localStorage.setItem("mh", JSON.stringify(hist));
+  renderHist();
+}
+function renderHist() {
+  document.getElementById("hist").innerHTML = hist.map(h =>
+    `<div class="hi">
+      <div class="hc">🧑 ${h.cmd} <span style="color:#0d0d1a;font-size:.64rem">${h.t||""}</span></div>
+      <div class="hr">🤖 ${h.reply}</div>
+    </div>`
+  ).join("");
+}
+function updateBadges() {
+  document.getElementById("bLearned").textContent = "🧠 " + lc + " learned";
+}
+
+// Brain health
+async function checkBrain() {
+  try {
+    const r = await fetch(BRAIN + "/health", { mode: "cors" });
+    const d = await r.json();
+    const el = document.getElementById("bStatus");
+    el.textContent = "⬤ Online";
+    el.className = "badge live";
+  } catch(e) {
+    const el = document.getElementById("bStatus");
+    el.textContent = "⬤ Waking up...";
+    el.className = "badge dead";
+  }
+}
+
+// Close panel on outside tap
+document.addEventListener("click", e => {
+  const p = document.getElementById("panel");
+  const g = document.querySelector(".gear");
+  if(p.classList.contains("open") && !p.contains(e.target) && !g.contains(e.target))
+    p.classList.remove("open");
+});
+</script>
+</body>
+</html>
