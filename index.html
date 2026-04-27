@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#050510">
+<title>MUPPURI</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:#050510;color:#fff;font-family:Arial,sans-serif;overflow-x:hidden}
+body{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px 16px}
+.logo{font-size:2.8rem;font-weight:900;letter-spacing:.2em;color:#00ff88;margin-bottom:2px;text-align:center}
+.sub{font-size:.62rem;color:#1a1a3a;letter-spacing:.1em;margin-bottom:20px;text-align:center}
+.setup{width:100%;max-width:340px;margin-bottom:20px;background:#0a0a1e;border:2px solid #00ff8833;border-radius:16px;padding:18px;text-align:center}
+.setup-title{font-size:.72rem;color:#00ff88;font-weight:700;letter-spacing:.1em;margin-bottom:8px}
+.setup-desc{font-size:.68rem;color:#333;margin-bottom:12px;line-height:1.6}
+.sinput{width:100%;background:#050510;border:1px solid #1a1a3a;border-radius:9px;padding:11px 14px;color:#fff;font-size:.88rem;outline:none;margin-bottom:8px}
+.sinput:focus{border-color:#00ff8844}
+.sinput::placeholder{color:#1a1a3a}
+.sbtn{width:100%;background:#00ff88;border:none;border-radius:9px;padding:12px;color:#000;font-size:.88rem;font-weight:700;cursor:pointer}
+.orb-area{position:relative;width:190px;height:190px;display:flex;align-items:center;justify-content:center;margin-bottom:18px}
+.ring{position:absolute;border-radius:50%;border:1px solid #00ff8810;pointer-events:none}
+.r1{width:190px;height:190px;animation:rp 3s ease-in-out infinite}
+.r2{width:228px;height:228px;animation:rp 3s ease-in-out infinite 1s}
+.r3{width:266px;height:266px;animation:rp 3s ease-in-out infinite 2s}
+@keyframes rp{0%,100%{opacity:.5;transform:scale(.97)}50%{opacity:.08;transform:scale(1.03)}}
+.orb{width:155px;height:155px;border-radius:50%;cursor:pointer;z-index:2;background:radial-gradient(circle at 38% 35%,#00ff88 0%,#0044cc 60%,#001133 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 0 60px #00ff8822;transition:transform .15s;user-select:none}
+.orb:active{transform:scale(.9)}
+.orb.ready{animation:oready 2.5s ease-in-out infinite}
+.orb.heard{animation:oheard .4s ease-in-out infinite}
+.orb.thinking{animation:othink .5s ease-in-out infinite}
+.orb.speaking{animation:ospeak .4s ease-in-out infinite}
+@keyframes oready{0%,100%{box-shadow:0 0 60px #00ff8833}50%{box-shadow:0 0 130px #00ff8877}}
+@keyframes oheard{0%,100%{box-shadow:0 0 130px #00ff88cc}50%{box-shadow:0 0 240px #00ff88ff}}
+@keyframes othink{0%,100%{box-shadow:0 0 60px #0088ff44}50%{box-shadow:0 0 150px #0088ffcc}}
+@keyframes ospeak{0%,100%{box-shadow:0 0 70px #ffaa0044}50%{box-shadow:0 0 170px #ffaa00dd}}
+.orb-icon{font-size:2.6rem;margin-bottom:3px}
+.orb-lbl{font-size:.52rem;font-weight:800;letter-spacing:.16em;color:rgba(0,0,0,.7)}
+.wave{display:none;align-items:flex-end;justify-content:center;gap:3px;height:28px;margin-bottom:10px}
+.wave.on{display:flex}
+.b{width:4px;border-radius:2px;background:#00ff88;animation:wv .75s ease-in-out infinite}
+.b:nth-child(1){height:8px}.b:nth-child(2){height:20px;animation-delay:.1s}.b:nth-child(3){height:26px;animation-delay:.2s}
+.b:nth-child(4){height:14px;animation-delay:.3s}.b:nth-child(5){height:22px;animation-delay:.4s}
+.b:nth-child(6){height:10px;animation-delay:.5s}.b:nth-child(7){height:24px;animation-delay:.15s}
+@keyframes wv{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
+.st{font-size:.82rem;color:#1e1e3a;text-align:center;min-height:20px;margin-bottom:8px;transition:color .3s}
+.st.on{color:#00ff8888}.st.think{color:#0088ff88}.st.speak{color:#ffaa0088}.st.err{color:#ff444488}
+.heard{background:#08080f;border:1px solid #0d0d1a;border-radius:10px;padding:8px 16px;max-width:360px;width:100%;margin-bottom:10px;font-size:.76rem;color:#1a1a3a;font-style:italic;text-align:center;min-height:32px;transition:all .3s}
+.heard.active{color:#00ff8888;border-color:#00ff8822}
+.heard.triggered{color:#00ff88;border-color:#00ff8866;background:#001a08;font-style:normal;font-weight:500}
+.speed{font-size:.6rem;color:#00ff8822;text-align:center;height:16px;margin-bottom:4px}
+.reply{background:#0a0a1e;border:1px solid #1a1a3a;border-radius:14px;padding:14px 18px;max-width:380px;width:100%;margin-bottom:12px;display:none;animation:fi .3s}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.rlbl{font-size:.56rem;color:#00ff88;letter-spacing:.12em;font-weight:700;margin-bottom:5px}
+.rtxt{font-size:.9rem;color:#ccc;line-height:1.65}
+.badges{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;margin-bottom:14px}
+.badge{font-size:.58rem;background:#030308;border:1px solid #0a0a1a;border-radius:20px;padding:3px 9px}
+.badge.green{color:#00ff88;border-color:#00ff8833}
+.badge.dim{color:#1a1a3a}
+.hist{width:100%;max-width:380px;margin-bottom:16px}
+.hi{background:#06060f;border:1px solid #0d0d1a;border-radius:10px;padding:9px 12px;margin-bottom:5px;animation:fi .3s}
+.hc{color:#00ff8855;font-size:.72rem;font-weight:700;margin-bottom:3px}
+.hr{color:#333;font-size:.74rem;line-height:1.4}
+.gear{position:fixed;top:14px;right:14px;background:#08080f;border:1px solid #1a1a3a;border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.1rem;z-index:100}
+.panel{position:fixed;top:0;right:0;height:100vh;width:290px;background:#060610;border-left:1px solid #1a1a3a;padding:20px 16px;z-index:200;transform:translateX(100%);transition:transform .3s;overflow-y:auto}
+.panel.open{transform:translateX(0)}
+.ptitle{font-size:.75rem;font-weight:700;color:#00ff88;letter-spacing:.1em;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+.pclose{cursor:pointer;color:#222;font-size:1.2rem}
+.plbl{font-size:.64rem;color:#333;letter-spacing:.06em;margin:10px 0 4px}
+.pinput{width:100%;background:#050510;border:1px solid #1a1a3a;border-radius:8px;padding:9px 12px;color:#fff;font-size:.82rem;outline:none;margin-bottom:4px}
+.pbtn{width:100%;margin-top:8px;background:#00ff8818;border:1px solid #00ff8833;border-radius:8px;padding:10px;color:#00ff88;font-size:.8rem;cursor:pointer;margin-bottom:4px}
+.pinfo{font-size:.6rem;color:#111;line-height:1.9;margin-top:12px}
+.hint{font-size:.6rem;color:#0d0d1a;text-align:center;max-width:300px;line-height:1.6;margin-bottom:14px}
+</style>
+</head>
+<body>
+
+<div class="gear" onclick="togglePanel()">⚙️</div>
+<div class="panel" id="panel">
+  <div class="ptitle">MUPPURI SETTINGS <span class="pclose" onclick="togglePanel()">✕</span></div>
+  <div class="plbl">SECRET WORD (from Render environment)</div>
+  <input class="pinput" type="password" id="pSecret" placeholder="your secret word" autocomplete="off"/>
+  <div class="plbl">WAKE WORD</div>
+  <input class="pinput" type="text" id="pWake" placeholder="muppuri" autocomplete="off"/>
+  <button class="pbtn" onclick="saveSettings()">SAVE &amp; ACTIVATE</button>
+  <button class="pbtn" onclick="testVoice()" style="background:#ffaa0011;border-color:#ffaa0033;color:#ffaa00">🔊 Test Voice — press this first</button>
+  <button class="pbtn" onclick="testBrain()" style="background:#0088ff11;border-color:#0088ff33;color:#0088ff">🧠 Test Brain Connection</button>
+  <div class="pinfo">
+    <strong style="color:#00ff8844">YOUR MUPPURI SYSTEM:</strong><br>
+    Brain: muppuri-brain.onrender.com<br>
+    Web: mvs146.github.io/muppuri-brain<br>
+    AI: Claude Haiku (unlimited, free)<br>
+    Cost: Rs. 0 forever<br><br>
+    <strong style="color:#00ff8844">HOW IT WORKS:</strong><br>
+    Your Render brain uses Claude AI<br>
+    to answer any question you ask.<br>
+    No credit card. No OpenAI. Free.<br><br>
+    <strong style="color:#00ff8844">VOICE COMMANDS:</strong><br>
+    "MUPPURI what is [anything]"<br>
+    "MUPPURI explain [topic]"<br>
+    "MUPPURI how to [do something]"<br>
+    "MUPPURI translate [text] to Telugu"<br>
+    "MUPPURI make a call to [number]"<br>
+    "MUPPURI write a message for [name]"<br>
+    "MUPPURI what time is it"<br><br>
+    <strong style="color:#ffaa0055">IMPORTANT:</strong><br>
+    Press Volume UP on phone before use.<br>
+    Tap "Test Voice" button above first.<br>
+    Use Google Chrome browser only.
+  </div>
+</div>
+
+<div class="logo">MUPPURI</div>
+<div class="sub">YOUR PERSONAL AI AGENT · CLAUDE POWERED · FREE FOREVER</div>
+
+<div class="setup" id="setup">
+  <div class="setup-title">⚡ ACTIVATE MUPPURI</div>
+  <div class="setup-desc">Enter your secret word to connect to your Render brain powered by Claude AI. No credit card needed.</div>
+  <input class="sinput" type="password" id="qSecret" placeholder="Enter your secret word" autocomplete="off"/>
+  <button class="sbtn" onclick="activate()">ACTIVATE — FREE FOREVER</button>
+  <div style="font-size:.62rem;color:#1a1a3a;margin-top:8px">Tap orb without secret for offline demo mode</div>
+</div>
+
+<div class="orb-area">
+  <div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div>
+  <div class="orb idle" id="orb" onclick="orbTap()">
+    <div class="orb-icon" id="oIcon">🎙</div>
+    <div class="orb-lbl" id="oLbl">TAP TO START</div>
+  </div>
+</div>
+<div class="wave" id="wave">
+  <div class="b"></div><div class="b"></div><div class="b"></div>
+  <div class="b"></div><div class="b"></div><div class="b"></div><div class="b"></div>
+</div>
+
+<div class="st" id="st">Enter secret word above to activate MUPPURI</div>
+<div class="heard" id="heard">Waiting for your voice...</div>
+<div class="speed" id="speed"></div>
+
+<div class="reply" id="reply">
+  <div class="rlbl">MUPPURI</div>
+  <div class="rtxt" id="rtxt"></div>
+</div>
+
+<div class="badges">
+  <div class="badge dim" id="bBrain">🧠 Checking brain...</div>
+  <div class="badge dim" id="bLearned">💬 0 questions</div>
+  <div class="badge green">🆓 Free Forever</div>
+  <div class="badge green">🌍 World Knowledge</div>
+</div>
+
+<div class="hist" id="hist"></div>
+<div class="hint">Say MUPPURI then your command · Keep volume UP · Works on any device</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// MUPPURI — Claude AI Powered — Free Forever
+// Brain: muppuri-brain.onrender.com (your Render server)
+// The Render server uses Claude AI to answer everything
+// ═══════════════════════════════════════════════════════
+
+const BRAIN = "https://muppuri-brain.onrender.com";
+
+const WAKE_V = [
+  "muppuri","mu puri","moo puri","mu poori","moopuri","mupuri",
+  "muppouri","mappuri","mu pur","mupoor","muppuree","muppury",
+  "mupury","mu poor","moo poor","muppurie","muppore","mupore",
+  "muppurii","mu puree","mupuree","muppuru","mu puru","mupuru",
+  "muppari","muppori","mooppuri","muupuri","mupari","moopure",
+  "mu pure","muppure","mupure","mu-puri","moo-puri","nuppuri",
+  "m puri","muppuris","moo poori","mu pooori"
+];
+
+let secret = localStorage.getItem("ms") || "";
+let wakeWord = (localStorage.getItem("mw") || "muppuri").toLowerCase();
+let listening = false, speaking = false, rec = null;
+const synth = window.speechSynthesis;
+let hist = JSON.parse(localStorage.getItem("mh") || "[]");
+let lc = parseInt(localStorage.getItem("lc") || "0");
+let memory = JSON.parse(localStorage.getItem("mup_mem") || "[]");
+let brainOnline = false;
+
+// ── INIT ────────────────────────────────────────────────
+window.addEventListener("load", () => {
+  // Load voices aggressively
+  [0, 200, 500, 1000, 2000, 3000].forEach(d => setTimeout(() => synth.getVoices(), d));
+
+  if(secret) {
+    document.getElementById("pSecret").value = secret;
+    document.getElementById("qSecret").value = secret;
+    document.getElementById("setup").style.display = "none";
+    setTimeout(() => startListening(), 400);
+    // Wake brain immediately
+    setTimeout(() => checkBrain(), 800);
+  }
+  document.getElementById("pWake").value = wakeWord;
+  renderHist(); updateBadges();
+  checkBrain();
+  setInterval(checkBrain, 60000);
+});
+
+// ── SETTINGS ────────────────────────────────────────────
+function togglePanel() { document.getElementById("panel").classList.toggle("open"); }
+
+function saveSettings() {
+  secret = document.getElementById("pSecret").value.trim();
+  wakeWord = (document.getElementById("pWake").value.trim() || "muppuri").toLowerCase();
+  if(secret) localStorage.setItem("ms", secret);
+  localStorage.setItem("mw", wakeWord);
+  document.getElementById("setup").style.display = "none";
+  togglePanel();
+  setSt("Activated — say " + wakeWord + " then your command", "on");
+  if(!listening) startListening();
+  else speak("Settings saved. I am ready.");
+}
+
+function activate() {
+  secret = document.getElementById("qSecret").value.trim();
+  if(!secret) {
+    // Demo mode without secret
+    document.getElementById("setup").style.display = "none";
+    setSt("Demo mode — tap orb and say MUPPURI", "on");
+    startListening();
+    return;
+  }
+  localStorage.setItem("ms", secret);
+  document.getElementById("pSecret").value = secret;
+  document.getElementById("setup").style.display = "none";
+  setSt("Activated — say " + wakeWord + " then your command", "on");
+  checkBrain();
+  startListening();
+}
+
+// ── ORB ─────────────────────────────────────────────────
+function orbTap() {
+  if(speaking) { synth.cancel(); speaking = false; return; }
+  listening ? stopListening() : startListening();
+}
+
+function setOrb(s) {
+  const icons = { idle:"🎙", ready:"🎙", heard:"✨", thinking:"🧠", speaking:"🔊" };
+  const lbls = { idle:"TAP TO START", ready:"LISTENING", heard:"HEARD YOU", thinking:"THINKING", speaking:"SPEAKING" };
+  document.getElementById("orb").className = "orb " + s;
+  document.getElementById("oIcon").textContent = icons[s] || "🎙";
+  document.getElementById("oLbl").textContent = lbls[s] || "TAP TO START";
+  document.getElementById("wave").className = "wave" + (s === "speaking" ? " on" : "");
+}
+
+function setSt(msg, c = "") {
+  const el = document.getElementById("st");
+  el.textContent = msg; el.className = "st " + c;
+}
+
+function setHeard(t, trig = false) {
+  const el = document.getElementById("heard");
+  el.textContent = t || "Listening...";
+  el.className = "heard" + (trig ? " triggered" : t ? " active" : "");
+}
+
+// ── SPEAK ────────────────────────────────────────────────
+function speak(text) {
+  if(!text) return;
+  synth.cancel();
+
+  const doSpeak = () => {
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "en-IN";
+    u.rate = 0.9;
+    u.pitch = 1.1;
+    u.volume = 1;
+
+    const vs = synth.getVoices();
+    const v =
+      vs.find(x => x.name.includes("Google") && x.lang === "en-IN") ||
+      vs.find(x => x.name.includes("Google") && x.lang.startsWith("en")) ||
+      vs.find(x => x.lang === "en-IN") ||
+      vs.find(x => x.lang.startsWith("en-")) ||
+      vs[0];
+    if(v) u.voice = v;
+
+    u.onstart = () => {
+      speaking = true;
+      setOrb("speaking");
+      setSt("🔊 Speaking — TURN UP VOLUME if silent", "speak");
+    };
+    u.onend = () => {
+      speaking = false;
+      if(listening) { setOrb("ready"); setSt("Listening for " + wakeWord + "...", "on"); }
+      else { setOrb("idle"); setSt("Tap orb to activate", ""); }
+    };
+    u.onerror = e => {
+      speaking = false;
+      if(e.error !== "interrupted") console.warn("TTS:", e.error);
+    };
+    synth.speak(u);
+  };
+
+  if(synth.getVoices().length > 0) {
+    doSpeak();
+  } else {
+    synth.onvoiceschanged = doSpeak;
+  }
+}
+
+function testVoice() {
+  speak("Hello! I am MUPPURI, your personal AI agent powered by Claude AI. I am fully activated and ready. Say MUPPURI followed by any question and I will answer instantly.");
+}
+
+// ── WAKE WORD ────────────────────────────────────────────
+function isWake(text) {
+  const t = text.toLowerCase().replace(/[.,!?]/g, "").trim();
+  if(t.includes(wakeWord)) return true;
+  return WAKE_V.some(v => t.includes(v));
+}
+
+function extractCmd(text) {
+  const t = text.toLowerCase().replace(/[.,!?]/g, "");
+  if(t.includes(wakeWord)) {
+    const a = text.substring(t.indexOf(wakeWord) + wakeWord.length).trim();
+    if(a.length > 0) return a;
+  }
+  for(const v of WAKE_V) {
+    const i = t.indexOf(v);
+    if(i !== -1) {
+      const a = text.substring(i + v.length).trim();
+      if(a.length > 0) return a;
+    }
+  }
+  return "";
+}
+
+// ── VOICE RECOGNITION ────────────────────────────────────
+function startListening() {
+  if(listening) return;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR) {
+    setSt("Use Google Chrome browser for voice", "err");
+    alert("Please use Google Chrome browser for voice commands.");
+    return;
+  }
+  listening = true;
+  rec = new SR();
+  rec.continuous = true;
+  rec.interimResults = true;
+  rec.lang = "en-IN";
+  let timer = null, pending = "";
+
+  rec.onresult = e => {
+    let interim = "", final = "";
+    for(let i = e.resultIndex; i < e.results.length; i++) {
+      if(e.results[i].isFinal) final += e.results[i][0].transcript + " ";
+      else interim += e.results[i][0].transcript;
+    }
+    const heard = (final || interim).trim();
+    if(!heard) return;
+    const trig = isWake(heard);
+    setHeard(heard, trig);
+
+    if(trig) {
+      setOrb("heard");
+      const cmd = extractCmd(heard);
+      clearTimeout(timer);
+      if(cmd.length > 1) {
+        pending = cmd;
+        timer = setTimeout(() => {
+          if(pending && !speaking) { processCmd(pending); pending = ""; }
+        }, 600);
+      } else {
+        setSt("Say your command now...", "on");
+        timer = setTimeout(() => {
+          if(listening && !speaking) { setOrb("ready"); setSt("Listening for " + wakeWord + "...", "on"); }
+        }, 5000);
+      }
+    }
+  };
+
+  rec.onerror = e => {
+    if(e.error === "not-allowed" || e.error === "permission-denied") {
+      listening = false; setOrb("idle");
+      setSt("Microphone blocked — tap lock icon in address bar → Allow", "err");
+    }
+  };
+
+  rec.onend = () => { if(listening) setTimeout(() => { try { rec.start(); } catch(e) {} }, 200); };
+
+  try { rec.start(); } catch(e) { console.warn(e); }
+  setOrb("ready");
+  setSt("Listening for " + wakeWord + "...", "on");
+  setHeard("Say " + wakeWord + " then your command");
+}
+
+function stopListening() {
+  listening = false;
+  if(rec) try { rec.abort(); } catch(e) {}
+  synth.cancel(); speaking = false;
+  setOrb("idle"); setSt("Tap orb to activate", "");
+}
+
+// ── PROCESS COMMAND ──────────────────────────────────────
+async function processCmd(cmd) {
+  if(!cmd.trim()) return;
+  setOrb("thinking");
+  setSt("Thinking...", "think");
+  lc++; localStorage.setItem("lc", lc); updateBadges();
+  const t0 = Date.now();
+
+  // Save personal info to memory
+  if(/my name|i am|i like|remember|my phone|my email|number is|my business|my address/i.test(cmd)) {
+    memory.push(cmd);
+    if(memory.length > 30) memory = memory.slice(-30);
+    localStorage.setItem("mup_mem", JSON.stringify(memory));
+  }
+
+  let reply = "";
+
+  // ── TRY RENDER BRAIN (Claude AI — free unlimited) ──
+  if(secret) {
+    setSt("Connecting to brain...", "think");
+    try {
+      const ctrl = new AbortController();
+      // 55 second timeout — Render free wakes in ~50 sec
+      const timeout = setTimeout(() => ctrl.abort(), 55000);
+      const res = await fetch(BRAIN + "/voice", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        mode: "cors",
+        signal: ctrl.signal,
+        body: JSON.stringify({ transcript: cmd, secret })
+      });
+      clearTimeout(timeout);
+      if(res.ok) {
+        const d = await res.json();
+        reply = d.reply || "";
+        brainOnline = true;
+        setBadge("bBrain", "🧠 Claude AI — Online", "green");
+      } else if(res.status === 403) {
+        reply = "Wrong secret word. Please check your settings.";
+      }
+    } catch(e) {
+      if(e.name === "AbortError") {
+        setSt("Brain waking up... saying answer from memory", "think");
+      }
+    }
+  }
+
+  // ── OFFLINE FALLBACK (always instant) ──
+  if(!reply) reply = offlineAnswer(cmd);
+
+  const ms = Date.now() - t0;
+  document.getElementById("speed").textContent = "⚡ " + ms + "ms" + (brainOnline ? " (Claude AI)" : " (offline)");
+
+  document.getElementById("reply").style.display = "block";
+  document.getElementById("rtxt").textContent = reply;
+  addHist(cmd, reply);
+  speak(reply);
+}
+
+// ── OFFLINE ANSWERS ──────────────────────────────────────
+function offlineAnswer(cmd) {
+  const c = cmd.toLowerCase();
+  if(c.includes("time")) return "I cannot check the exact time offline. Please connect to your brain server for real-time information.";
+  if(c.includes("newton") && c.includes("third")) return "Newton's third law states: for every action there is an equal and opposite reaction. If you push a wall, the wall pushes back with the same force.";
+  if(c.includes("newton") && c.includes("first")) return "Newton's first law: an object stays at rest or keeps moving unless an external force acts on it. This is called inertia.";
+  if(c.includes("newton") && c.includes("second")) return "Newton's second law: Force equals mass times acceleration. The heavier the object or the more acceleration needed, the more force required.";
+  if(c.includes("gravity")) return "Gravity is the force of attraction between objects with mass. Earth's gravity pulls everything at 9.8 meters per second squared toward the ground.";
+  if(c.includes("photosynthesis")) return "Photosynthesis is how plants make food. They use sunlight, water, and carbon dioxide to produce glucose and release oxygen.";
+  if(c.includes("capital") && c.includes("india")) return "New Delhi is the capital of India.";
+  if(c.includes("capital") && c.includes("france")) return "Paris is the capital of France.";
+  if(c.includes("capital") && c.includes("japan")) return "Tokyo is the capital of Japan.";
+  if(c.includes("capital") && c.includes("usa") || c.includes("capital") && c.includes("america")) return "Washington D.C. is the capital of the United States.";
+  if(c.includes("dark web")) return "The dark web is the hidden part of the internet accessible only through Tor browser. Cybersecurity professionals who protect against dark web threats earn Rs.10 to 30 lakhs per year.";
+  if(c.includes("make money") || c.includes("earn money")) return "The fastest ways to earn money online in India are freelancing on Upwork or Fiverr, selling on Meesho or Amazon, YouTube content creation, or digital marketing services.";
+  if(c.includes("diabetes")) return "Diabetes is high blood sugar caused by insufficient insulin. Type 2 can be improved with low-carb diet, daily exercise, and weight loss. Avoid rice, white bread, and sugary drinks.";
+  if(c.includes("translate") && c.includes("telugu")) return "In Telugu: Hello is Namaskaram. How are you is Meeru ela unnaru. Thank you is Dhanyavaadalu. Good morning is Subhodayam.";
+  if(c.includes("introduce") || c.includes("who are you")) return "I am MUPPURI, your personal AI agent powered by Claude AI. I can answer any question, make calls, translate languages, write messages, and help with all your work. Say MUPPURI followed by any command.";
+  if(c.includes("build") && c.includes("app")) return "To build a data app, use Python with Streamlit. Install it with pip install streamlit, write your code, then run streamlit run app.py. Deploy free on Streamlit Cloud in minutes.";
+  if(c.includes("improve") || c.includes("brain")) return "To improve MUPPURI's responses, make sure your Render brain is online. The brain uses Claude AI for unlimited free answers. Check your secret word in Settings and ensure Render shows Online status.";
+  if(c.includes("what is ai") || c.includes("artificial intelligence")) return "Artificial intelligence is computer systems that think and learn like humans. I am an AI powered by Claude, Anthropic's AI model. AI can understand language, answer questions, and solve complex problems.";
+  if(c.includes("pythagoras")) return "Pythagoras theorem: in a right triangle, a squared plus b squared equals c squared. If two sides are 3 and 4, the hypotenuse is 5.";
+  if(c.includes("independence") && c.includes("india")) return "India gained independence on August 15, 1947 after nearly 200 years of British rule. Mahatma Gandhi led the nonviolent freedom movement.";
+  if(c.includes("world war")) return "World War 2 lasted from 1939 to 1945. It ended with Germany's defeat and the atomic bombs on Japan. Over 70 million people died making it the deadliest conflict in history.";
+  // Default
+  return "Your brain server is offline or waking up. Please wait 30 seconds and say MUPPURI again. The brain uses Claude AI and will answer any question when connected. Check that Render shows Online in your dashboard.";
+}
+
+// ── HISTORY ──────────────────────────────────────────────
+function addHist(cmd, reply) {
+  hist.unshift({ cmd, reply: reply.substring(0, 180), t: new Date().toLocaleTimeString() });
+  if(hist.length > 5) hist.pop();
+  localStorage.setItem("mh", JSON.stringify(hist));
+  renderHist();
+}
+
+function renderHist() {
+  document.getElementById("hist").innerHTML = hist.map(h =>
+    `<div class="hi">
+      <div class="hc">🧑 ${h.cmd}<span style="color:#0a0a1a;font-size:.63rem;margin-left:6px">${h.t||""}</span></div>
+      <div class="hr">🤖 ${h.reply}</div>
+    </div>`
+  ).join("");
+}
+
+function updateBadges() {
+  document.getElementById("bLearned").textContent = "💬 " + lc + " questions";
+}
+
+function setBadge(id, text, cls = "dim") {
+  const el = document.getElementById(id);
+  if(el) { el.textContent = text; el.className = "badge " + cls; }
+}
+
+async function checkBrain() {
+  try {
+    const r = await fetch(BRAIN + "/health", { mode: "cors" });
+    if(r.ok) {
+      brainOnline = true;
+      setBadge("bBrain", "🧠 Claude AI — Online", "green");
+    }
+  } catch(e) {
+    brainOnline = false;
+    setBadge("bBrain", "🧠 Brain waking up...", "dim");
+  }
+}
+
+async function testBrain() {
+  setSt("Testing brain connection...", "think");
+  try {
+    const r = await fetch(BRAIN + "/health", { mode: "cors" });
+    const d = await r.json();
+    setSt("Brain online: " + d.status, "on");
+    speak("Brain is connected and online. Claude AI is ready.");
+  } catch(e) {
+    setSt("Brain offline — check Render dashboard", "err");
+    speak("Brain is offline. Please check your Render dashboard and make sure it shows online.");
+  }
+}
+
+document.addEventListener("click", e => {
+  const p = document.getElementById("panel"), g = document.querySelector(".gear");
+  if(p.classList.contains("open") && !p.contains(e.target) && !g.contains(e.target))
+    p.classList.remove("open");
+});
+</script>
+</body>
+</html>
